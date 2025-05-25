@@ -3,6 +3,7 @@ import ShuffleHero from "../component/HeroSection/ShuffleHero";
 import { TextParallaxContentExample } from "../component/TextParallaxContent";
 import { Example } from "../component/BlockInTextCard";
 import UtilityBar from "../component/Naviagtion/UtilityBar";
+import Footer from "../component/footer/Footer";
 
 const Home = () => {
   return (
@@ -14,6 +15,7 @@ const Home = () => {
         <ShuffleHero />
         <TextParallaxContentExample />
         <Example />
+        <Footer />
       </div>
     </>
   );
