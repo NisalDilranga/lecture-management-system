@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Modal,
   Box,
@@ -8,6 +9,10 @@ import {
   IconButton,
   InputAdornment,
   Divider,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import {
   Visibility,
@@ -15,14 +20,17 @@ import {
   Close,
   Email,
   Lock,
+  AdminPanelSettings,
+  Person,
 } from "@mui/icons-material";
 
 const LoginComp = ({ open, handleClose }) => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);  const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,12 +42,41 @@ const LoginComp = ({ open, handleClose }) => {
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
-  };
-
-  const handleSubmit = (e) => {
+  };  const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Login attempt with:", formData);
-    // Add your authentication logic here
+    
+    setError(""); // Clear previous errors
+    
+    // Demo credentials with status codes
+    // status 1: admin lecturer (full access)
+    // status 2: visiting lecturer (limited access)
+    // status 3: permanent lecturer (standard access)
+    const lecturerData = [
+      { email: "admin@gmail.com", password: "123456", status: 1, role: "Admin Lecturer" },
+      { email: "lec@gmail.com", password: "123456", status: 2, role: "Visiting Lecturer" },
+      { email: "perm@gmail.com", password: "123456", status: 3, role: "Permanent Lecturer" }
+    ];
+    
+    // Find matching lecturer
+    const lecturer = lecturerData.find(
+      l => l.email === formData.email && l.password === formData.password
+    );
+    
+    if (lecturer) {
+      // Store auth info
+      localStorage.setItem("lecturerAuth", "true");
+      localStorage.setItem("lecturerStatus", lecturer.status.toString());
+      localStorage.setItem("lecturerEmail", lecturer.email);
+      localStorage.setItem("lecturerRole", lecturer.role);
+      
+      handleClose();
+      
+      // All users go to admin dashboard
+      navigate("/admin/dashboard");
+    } else {
+      setError("Invalid email or password");
+    }
   };
 
   return (
@@ -56,9 +93,7 @@ const LoginComp = ({ open, handleClose }) => {
           size="small"
         >
           <Close />
-        </IconButton>
-
-        <div className="text-center mb-8">
+        </IconButton>        <div className="text-center mb-8">
           <Typography
             variant="h5"
             component="h2"
@@ -71,9 +106,20 @@ const LoginComp = ({ open, handleClose }) => {
           </Typography>
         </div>
 
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
-            <div className="mb-10">
+            <div className="mb-6">              <Typography variant="body2" className="text-gray-600 mb-4 text-center">
+                Login with your lecturer credentials
+              </Typography>
+            </div>
+            
+            <div className="mb-6">
               <TextField
                 fullWidth
                 label="Email"
@@ -91,7 +137,7 @@ const LoginComp = ({ open, handleClose }) => {
                     </InputAdornment>
                   ),
                 }}
-                className="mb-10"
+                className="mb-6"
               />
             </div>
 
@@ -147,9 +193,7 @@ const LoginComp = ({ open, handleClose }) => {
                   Forgot password?
                 </a>
               </div>
-            </div>
-
-            <Button
+            </div>            <Button
               type="submit"
               variant="contained"
               fullWidth
@@ -157,6 +201,13 @@ const LoginComp = ({ open, handleClose }) => {
             >
               Sign in
             </Button>
+            
+            <div className="mt-4 text-xs text-gray-500 text-center">
+              <p>Demo credentials:</p>
+              <p>Admin: admin@gmail.com / 123456</p>
+              <p>Visiting Lecturer: lec@gmail.com / 123456</p>
+              <p>Permanent Lecturer: perm@gmail.com / 123456</p>
+            </div>
           </div>
         </form>
       </Box>

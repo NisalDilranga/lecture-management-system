@@ -1,13 +1,46 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "../../App.css";
 import LoginComp from "../Login/LoginComp";
 
-const NavBar = () => {
+const NavBar = ({ setLoginModalOpen: setParentLoginModalOpen }) => {
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState("");
+  const [userEmail, setUserEmail] = useState("");
 
-  const handleOpenLoginModal = () => setLoginModalOpen(true);
+  const handleOpenLoginModal = () => {
+    if (setParentLoginModalOpen) {
+      setParentLoginModalOpen(true);
+    } else {
+      setLoginModalOpen(true);
+    }
+  };
+  
   const handleCloseLoginModal = () => setLoginModalOpen(false);
+  const handleLogout = () => {
+    localStorage.removeItem('lecturerAuth');
+    localStorage.removeItem('lecturerRole');
+    localStorage.removeItem('lecturerEmail');
+    localStorage.removeItem('lecturerStatus');
+    setIsLoggedIn(false);
+    setUserRole("");
+    setUserEmail("");
+    navigate("/");
+  };
+
+  useEffect(() => {    // Check authentication status whenever component mounts
+    const lecturerAuth = localStorage.getItem('lecturerAuth') === 'true';
+    const storedLecturerStatus = Number(localStorage.getItem('lecturerStatus'));
+    const storedLecturerEmail = localStorage.getItem('lecturerEmail');
+    const storedLecturerRole = localStorage.getItem('lecturerRole');
+    
+    setIsLoggedIn(lecturerAuth);
+    setUserRole(storedLecturerRole || "");
+    setUserEmail(storedLecturerEmail || "");
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -129,23 +162,41 @@ const NavBar = () => {
                   </a>
                 </li>
               </ul>
-            </nav>{" "}
-            {scrolled && (
+            </nav>{" "}            {scrolled && (
               <div className="flex items-center gap-4">
-                <div className="sm:flex sm:gap-4">
-                  {" "}
-                  <button
-                    onClick={handleOpenLoginModal}
-                    className="block rounded-md bg-teal-600 px-5 py-2 text-[15px] font-medium text-white transition-all duration-300 hover:bg-teal-700 hover:shadow-lg hover:shadow-teal-600/20"
-                  >
-                    Login
-                  </button>
-                  <a
-                    className="hidden rounded-md border-2 border-teal-600 bg-transparent px-5 py-1.5 text-[15px] font-medium text-teal-600 transition-all duration-300 hover:bg-teal-600 hover:text-white sm:block"
-                    href="#"
-                  >
-                    Apply Now
-                  </a>
+                <div className="sm:flex sm:gap-4">                  {isLoggedIn ? (
+                    <div className="flex items-center gap-3">                      <a
+                        href="/admin/dashboard"
+                        className="block rounded-md bg-indigo-600 px-5 py-2 text-[15px] font-medium text-white transition-all duration-300 hover:bg-indigo-700 hover:shadow-lg"
+                      >
+                        Lecturer Dashboard
+                      </a>
+                      <div className="hidden sm:block text-sm text-gray-600">
+                        {userEmail}
+                        <div className="text-xs text-gray-500">{userRole}</div>
+                      </div>
+                      <button
+                        onClick={handleLogout}
+                        className="block rounded-md bg-gray-200 px-5 py-2 text-[15px] font-medium text-gray-800 transition-all duration-300 hover:bg-gray-300"
+                      >
+                        Logout
+                      </button>
+                    </div>                  ) : (
+                    <>
+                      <button
+                        onClick={handleOpenLoginModal}
+                        className="block rounded-md bg-teal-600 px-5 py-2 text-[15px] font-medium text-white transition-all duration-300 hover:bg-teal-700 hover:shadow-lg hover:shadow-teal-600/20"
+                      >
+                        Login
+                      </button>
+                      <a
+                        className="hidden rounded-md border-2 border-teal-600 bg-transparent px-5 py-1.5 text-[15px] font-medium text-teal-600 transition-all duration-300 hover:bg-teal-600 hover:text-white sm:block"
+                        href="#"
+                      >
+                        Apply Now
+                      </a>
+                    </>
+                  )}
                 </div>{" "}
                 <button className="block rounded-md bg-gray-100 p-2.5 text-gray-700 transition-all duration-300 hover:bg-teal-600 hover:text-white md:hidden">
                   <span className="sr-only">Toggle menu</span>
