@@ -11,7 +11,7 @@ const Home = () => {
       <UtilityBar />
       <NavBar />
 
-      <div>
+      <div className="">
         <ShuffleHero />
         <TextParallaxContentExample />
         <Example />

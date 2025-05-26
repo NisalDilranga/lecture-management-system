@@ -4,8 +4,8 @@ import animation from "../../assets/lecure.json";
 const ShuffleHero = () => {
   return (
     <section className="bg-gray-200 lg:grid ">
-      <div className="mx-auto w-screen max-w-screen-xl  h-[95vh] px-4 py-16 sm:px-6 sm:py-24 md:grid md:grid-cols-2 md:items-center md:gap-4  lg:py-32 ">
-        <div className="max-w-full text-left  ">
+      <div className="mx-auto max-w-[1400px]  h-[95vh] px-4 py-16 sm:px-6 sm:py-24 md:grid md:grid-cols-2 md:items-center md:gap-4  lg:py-32 ">
+        <div className=" text-left  ">
           <span className="block mb-4 text-xs md:text-sm text-indigo-500 font-medium">
             Better every day
           </span>

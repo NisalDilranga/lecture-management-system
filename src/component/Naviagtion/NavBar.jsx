@@ -110,7 +110,7 @@ const NavBar = () => {
                     className={` ${
                       scrolled ? "text-gray-700" : " text-black"
                     } transition  rounded-md px-3 py-2 hover:bg-gray-100 hover:text-black`}
-                    href="#"
+                    href="/vacancies"
                   >
                     {" "}
                     Vacancy{" "}
