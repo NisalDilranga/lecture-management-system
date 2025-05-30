@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import {
   FiBarChart,
+  FiBriefcase,
   FiChevronDown,
   FiChevronsRight,
   FiDollarSign,
+  FiGrid,
   FiHome,
   FiMonitor,
   FiShoppingCart,
@@ -20,8 +22,7 @@ const Sidebar = () => {
   const [open, setOpen] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
-  
-  // Get the current route path and determine which item is selected
+    // Get the current route path and determine which item is selected
   const currentPath = location.pathname;
   const selectedPath = currentPath.split('/').pop();
   const pathToTitle = {
@@ -33,6 +34,8 @@ const Sidebar = () => {
     "analytics": "Analytics",
     "members": "Members",
     "lecturer-management": "Lecturer Management",
+    "department-management": "Department Management",
+    "vacancy-management": "Vacancy Management",
   };
   const defaultSelected = pathToTitle[selectedPath] || "Dashboard";
   const [selected, setSelected] = useState(defaultSelected);
@@ -122,12 +125,33 @@ const Sidebar = () => {
             open={open}
           />
         )}
-        
-        {/* Lecturer Management - accessible to status 1 (admin) only */}
+          {/* Lecturer Management - accessible to status 1 (admin) only */}
         {lecturerStatus === 1 && (
           <Option
             Icon={FiUserPlus}
             title="Lecturer Management"
+            selected={selected}
+            setSelected={setSelected}
+            open={open}
+          />
+        )}
+        
+        {/* Department Management - accessible to status 1 (admin) only */}
+        {lecturerStatus === 1 && (
+          <Option
+            Icon={FiGrid}
+            title="Department Management"
+            selected={selected}
+            setSelected={setSelected}
+            open={open}
+          />
+        )}
+        
+        {/* Vacancy Management - accessible to status 1 (admin) only */}
+        {lecturerStatus === 1 && (
+          <Option
+            Icon={FiBriefcase}
+            title="Vacancy Management"
             selected={selected}
             setSelected={setSelected}
             open={open}
@@ -142,8 +166,7 @@ const Sidebar = () => {
 
 const Option = ({ Icon, title, selected, setSelected, open, notifs }) => {
   const navigate = useNavigate();
-  
-  // Convert title to route path
+    // Convert title to route path
   const getRoutePath = (title) => {
     const routeMap = {
       "Dashboard": "dashboard",
@@ -153,7 +176,9 @@ const Option = ({ Icon, title, selected, setSelected, open, notifs }) => {
       "Tags": "tags",
       "Analytics": "analytics",
       "Members": "members",
-      "Lecturer Management": "lecturer-management"
+      "Lecturer Management": "lecturer-management",
+      "Department Management": "department-management",
+      "Vacancy Management": "vacancy-management"
     };
     
     return `/admin/${routeMap[title] || title.toLowerCase()}`;

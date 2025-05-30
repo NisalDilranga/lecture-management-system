@@ -41,11 +41,11 @@ const LecturerManagement = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    role: 'permanent', // Default to permanent
+    role: 'admin', // Default to admin
     contactNumber: '',
     mobileNumber: '',
     password: '123456', // Default password
-    status: 3, // 1: admin, 2: visiting, 3: permanent
+    status: 1, // 1: admin, 2: visiting
     departments: [],
     subjects: [],
     hourlyRate: '',
@@ -113,7 +113,6 @@ const LecturerManagement = () => {
       setAvailableSubjects(allSubjects);
     }
   }, [formData.departments, formData.role]);
-
   // Load demo data on component mount
   useEffect(() => {
     // Sample demo data
@@ -122,7 +121,7 @@ const LecturerManagement = () => {
         id: 1,
         name: 'John Smith',
         email: 'admin@gmail.com',
-        role: 'Admin Lecturer',
+        role: 'Admin',
         contactNumber: '0112345678',
         mobileNumber: '0771234567',
         status: 1,
@@ -134,25 +133,13 @@ const LecturerManagement = () => {
         id: 2,
         name: 'Jane Doe',
         email: 'lec@gmail.com',
-        role: 'Visiting Lecturer',
+        role: 'Visiting Lech',
         contactNumber: '0113456789',
         mobileNumber: '0772345678',
         status: 2,
         departments: ['Information Technology', 'Computer Applications'],
         subjects: ['Software Engineering', 'Mobile Development'],
         hourlyRate: '2500'
-      },
-      {
-        id: 3,
-        name: 'Mark Johnson',
-        email: 'perm@gmail.com',
-        role: 'Permanent Lecturer',
-        contactNumber: '0114567890',
-        mobileNumber: '0773456789',
-        status: 3,
-        departments: [],
-        subjects: ['Mathematics', 'Physics'],
-        hourlyRate: ''
       }
     ];
     
@@ -175,13 +162,12 @@ const LecturerManagement = () => {
   }
 
   const handleDialogOpen = (lecturer = null) => {
-    if (lecturer) {
-      // Edit mode - pre-populate form with lecturer data
+    if (lecturer) {      // Edit mode - pre-populate form with lecturer data
       setSelectedLecturer(lecturer);
       setFormData({
         name: lecturer.name,
         email: lecturer.email,
-        role: lecturer.status === 1 ? 'admin' : lecturer.status === 2 ? 'visiting' : 'permanent',
+        role: lecturer.status === 1 ? 'admin' : 'visiting',
         contactNumber: lecturer.contactNumber,
         mobileNumber: lecturer.mobileNumber,
         password: '******', // Masked for security
@@ -196,11 +182,11 @@ const LecturerManagement = () => {
       setFormData({
         name: '',
         email: '',
-        role: 'permanent',
+        role: 'admin',
         contactNumber: '',
         mobileNumber: '',
         password: '123456', // Default password
-        status: 3,
+        status: 1,
         departments: [],
         subjects: [],
         hourlyRate: '',
@@ -213,13 +199,12 @@ const LecturerManagement = () => {
     setOpenDialog(false);
     setFormErrors({});
   };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
     // Update status based on role
     if (name === 'role') {
-      const status = value === 'admin' ? 1 : value === 'visiting' ? 2 : 3;
+      const status = value === 'admin' ? 1 : 2; // 1 for admin, 2 for visiting lech
       setFormData(prev => ({
         ...prev,
         [name]: value,
@@ -254,7 +239,6 @@ const LecturerManagement = () => {
       subjects: []
     }));
   };
-
   const validateForm = () => {
     const errors = {};
     if (!formData.name.trim()) errors.name = 'Name is required';
@@ -277,12 +261,9 @@ const LecturerManagement = () => {
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       return;
-    }
-
-    const roleName = 
-      formData.role === 'admin' ? 'Admin Lecturer' :
-      formData.role === 'visiting' ? 'Visiting Lecturer' :
-      'Permanent Lecturer';
+    }    const roleName = 
+      formData.role === 'admin' ? 'Admin' :
+      'Visiting Lech';
 
     const newLecturer = {
       id: selectedLecturer ? selectedLecturer.id : lecturers.length + 1,
@@ -484,9 +465,7 @@ const LecturerManagement = () => {
               required
               error={!!formErrors.email}
               helperText={formErrors.email}
-            />
-
-            <FormControl fullWidth required>
+            />            <FormControl fullWidth required>
               <InputLabel>Lecturer Type</InputLabel>
               <Select
                 name="role"
@@ -494,9 +473,8 @@ const LecturerManagement = () => {
                 onChange={handleInputChange}
                 label="Lecturer Type"
               >
-                <MenuItem value="admin">Admin Lecturer</MenuItem>
-                <MenuItem value="visiting">Visiting Lecturer</MenuItem>
-                <MenuItem value="permanent">Permanent Lecturer</MenuItem>
+                <MenuItem value="admin">Admin</MenuItem>
+                <MenuItem value="visiting">Visiting Lech</MenuItem>
               </Select>
             </FormControl>
             
@@ -568,45 +546,44 @@ const LecturerManagement = () => {
                   <FormHelperText>{formErrors.departments}</FormHelperText>
                 )}
               </FormControl>
-            )}
-
-            {/* Show subject selection after departments for visiting lecturers */}
-            <FormControl fullWidth className="col-span-2" error={!!formErrors.subjects}>
-              <Autocomplete
-                multiple
-                id="subjects"
-                options={formData.role === 'visiting' ? availableSubjects : allSubjects}
-                value={formData.subjects}
-                onChange={handleSubjectsChange}
-                disabled={formData.role === 'visiting' && formData.departments.length === 0}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Subjects"
-                    required={formData.role === 'visiting'}
-                    error={!!formErrors.subjects}
-                    helperText={
-                      formData.role === 'visiting' && formData.departments.length === 0 
-                      ? 'Select departments first' 
-                      : formErrors.subjects || ''
-                    }
-                  />
-                )}
-                renderTags={(value, getTagProps) =>
-                  value.map((option, index) => (
-                    <Chip
-                      variant="outlined"
-                      label={option}
-                      size="small"
+            )}            {/* Show subject selection after departments for visiting lecturers */}
+            {formData.role === 'visiting' && (
+              <FormControl fullWidth className="col-span-2" error={!!formErrors.subjects}>
+                <Autocomplete
+                  multiple
+                  id="subjects"
+                  options={availableSubjects}
+                  value={formData.subjects}
+                  onChange={handleSubjectsChange}
+                  disabled={formData.departments.length === 0}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Subjects"
+                      required={true}
+                      error={!!formErrors.subjects}
+                      helperText={
+                        formData.departments.length === 0 
+                        ? 'Select departments first' 
+                        : formErrors.subjects || ''
+                      }
+                    />
+                  )}
+                  renderTags={(value, getTagProps) =>
+                    value.map((option, index) => (
+                      <Chip
+                        variant="outlined"
+                        label={option}
+                        size="small"
                       {...getTagProps({ index })}
                     />
                   ))
-                }
-              />
-              {formErrors.subjects && (
-                <FormHelperText>{formErrors.subjects}</FormHelperText>
-              )}
-            </FormControl>
+                }              />
+                {formErrors.subjects && (
+                  <FormHelperText>{formErrors.subjects}</FormHelperText>
+                )}
+              </FormControl>
+            )}
             
             {/* Show hourly rate only for visiting lecturers */}
             {formData.role === 'visiting' && (

@@ -10,6 +10,8 @@ import Tags from "./component/adminSection/DashBoard/Tags";
 import Analytics from "./component/adminSection/DashBoard/Analytics";
 import Members from "./component/adminSection/DashBoard/Members";
 import LecturerManagement from "./component/adminSection/DashBoard/LecturerManagement";
+import DepartmentManagement from "./component/adminSection/DashBoard/DepartmentManagement";
+import VacancyManagement from "./component/adminSection/DashBoard/VacancyManagement";
 import ProtectedRoute from "./component/adminSection/ProtectedRoute";
 import {
   BrowserRouter as Router,
@@ -41,6 +43,8 @@ function App() {
               <Route path="analytics" element={<Analytics />} />
               <Route path="members" element={<Members />} />
               <Route path="lecturer-management" element={<LecturerManagement />} />
+              <Route path="department-management" element={<DepartmentManagement />} />
+              <Route path="vacancy-management" element={<VacancyManagement />} />
             </Route>
           </Route>
         </Routes>
