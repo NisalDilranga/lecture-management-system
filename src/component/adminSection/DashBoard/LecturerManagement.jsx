@@ -52,25 +52,67 @@ const LecturerManagement = () => {
   });
   const [formErrors, setFormErrors] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
+  const [availableSubjects, setAvailableSubjects] = useState([]);
 
   const lecturerStatus = Number(localStorage.getItem('lecturerStatus')) || 1;
 
-  // Mock subjects list
-  const allSubjects = [
-    'Mathematics', 'Physics', 'Chemistry', 'Biology',
-    'Computer Science', 'Database Systems', 'Web Development', 
-    'Software Engineering', 'Networking', 'Cybersecurity',
-    'Data Structures', 'Algorithms', 'Machine Learning',
-    'Artificial Intelligence', 'Mobile Development'
+  // Mock departments and subjects by department
+  const allDepartments = [
+    'Information Technology', 
+    'Engineering', 
+    'Science',
+    'Business Management', 
+    'Languages', 
+    'Mathematics',
+    'Civil Engineering', 
+    'Electrical Engineering', 
+    'Mechanical Engineering',
+    'Computer Applications', 
+    'Accountancy'
   ];
 
-  // Mock departments list
-  const allDepartments = [
-    'Information Technology', 'Engineering', 'Science',
-    'Business Management', 'Languages', 'Mathematics',
-    'Civil Engineering', 'Electrical Engineering', 'Mechanical Engineering',
-    'Computer Applications', 'Accountancy'
-  ];
+  // Subjects organized by department
+  const subjectsByDepartment = {
+    'Information Technology': ['Web Development', 'Database Systems', 'Computer Science', 'Software Engineering', 'Cybersecurity', 'Data Structures'],
+    'Engineering': ['Mechanics', 'Engineering Drawing', 'Thermodynamics', 'Materials Science'],
+    'Science': ['Physics', 'Chemistry', 'Biology'],
+    'Business Management': ['Accounting', 'Marketing', 'Human Resources', 'Economics'],
+    'Languages': ['English', 'Sinhala', 'Tamil', 'French'],
+    'Mathematics': ['Calculus', 'Statistics', 'Linear Algebra', 'Discrete Mathematics'],
+    'Civil Engineering': ['Structural Engineering', 'Surveying', 'Soil Mechanics', 'Construction Management'],
+    'Electrical Engineering': ['Circuit Theory', 'Power Systems', 'Electronics', 'Electromagnetic Theory'],
+    'Mechanical Engineering': ['Machine Design', 'Fluid Mechanics', 'Heat Transfer', 'Manufacturing Processes'],
+    'Computer Applications': ['Mobile Development', 'Cloud Computing', 'IoT', 'Artificial Intelligence'],
+    'Accountancy': ['Financial Accounting', 'Cost Accounting', 'Taxation', 'Audit']
+  };
+
+  // Flat list of all subjects for when departments are not selected
+  const allSubjects = Object.values(subjectsByDepartment).flat();
+
+  // Update available subjects when departments change
+  useEffect(() => {
+    if (formData.role === 'visiting' && formData.departments.length > 0) {
+      // Filter subjects based on selected departments
+      const filteredSubjects = formData.departments.flatMap(
+        dept => subjectsByDepartment[dept] || []
+      );
+      setAvailableSubjects(filteredSubjects);
+      
+      // Remove any subjects that are not in the filtered list
+      const validSubjects = formData.subjects.filter(subject => 
+        filteredSubjects.includes(subject)
+      );
+      
+      if (validSubjects.length !== formData.subjects.length) {
+        setFormData(prev => ({
+          ...prev,
+          subjects: validSubjects
+        }));
+      }
+    } else {
+      setAvailableSubjects(allSubjects);
+    }
+  }, [formData.departments, formData.role]);
 
   // Load demo data on component mount
   useEffect(() => {
@@ -97,7 +139,7 @@ const LecturerManagement = () => {
         mobileNumber: '0772345678',
         status: 2,
         departments: ['Information Technology', 'Computer Applications'],
-        subjects: ['Software Engineering', 'Machine Learning'],
+        subjects: ['Software Engineering', 'Mobile Development'],
         hourlyRate: '2500'
       },
       {
@@ -185,7 +227,9 @@ const LecturerManagement = () => {
         // Clear hourly rate if not a visiting lecturer
         hourlyRate: value !== 'visiting' ? '' : prev.hourlyRate,
         // Clear departments if not a visiting lecturer
-        departments: value !== 'visiting' ? [] : prev.departments
+        departments: value !== 'visiting' ? [] : prev.departments,
+        // Clear subjects if changing role
+        subjects: []
       }));
     } else {
       setFormData(prev => ({
@@ -205,7 +249,9 @@ const LecturerManagement = () => {
   const handleDepartmentsChange = (event, newValue) => {
     setFormData(prev => ({
       ...prev,
-      departments: newValue
+      departments: newValue,
+      // Clear subjects when departments change to force reselection
+      subjects: []
     }));
   };
 
@@ -318,7 +364,8 @@ const LecturerManagement = () => {
       <TableContainer component={Paper} className="shadow-md">
         <Table>
           <TableHead className="bg-gray-100">
-            <TableRow>              <TableCell className="font-bold">Name</TableCell>
+            <TableRow>
+              <TableCell className="font-bold">Name</TableCell>
               <TableCell className="font-bold">Email</TableCell>
               <TableCell className="font-bold">Role</TableCell>
               <TableCell className="font-bold">Contact</TableCell>
@@ -347,7 +394,8 @@ const LecturerManagement = () => {
                       lecturer.status === 2 ? "bg-purple-600" : "bg-green-600"
                     }
                   />
-                </TableCell>                <TableCell>
+                </TableCell>
+                <TableCell>
                   <div>{lecturer.contactNumber}</div>
                   <div className="text-xs text-gray-500">{lecturer.mobileNumber}</div>
                 </TableCell>
@@ -486,7 +534,9 @@ const LecturerManagement = () => {
               error={!!formErrors.mobileNumber}
               helperText={formErrors.mobileNumber}
             />
-              {formData.role === 'visiting' && (
+            
+            {/* Show departments only for visiting lecturers */}
+            {formData.role === 'visiting' && (
               <FormControl fullWidth className="col-span-2" error={!!formErrors.departments}>
                 <Autocomplete
                   multiple
@@ -498,7 +548,7 @@ const LecturerManagement = () => {
                     <TextField
                       {...params}
                       label="Departments"
-                      required={formData.role === 'visiting'}
+                      required={true}
                       error={!!formErrors.departments}
                     />
                   )}
@@ -520,19 +570,26 @@ const LecturerManagement = () => {
               </FormControl>
             )}
 
+            {/* Show subject selection after departments for visiting lecturers */}
             <FormControl fullWidth className="col-span-2" error={!!formErrors.subjects}>
               <Autocomplete
                 multiple
                 id="subjects"
-                options={allSubjects}
+                options={formData.role === 'visiting' ? availableSubjects : allSubjects}
                 value={formData.subjects}
                 onChange={handleSubjectsChange}
+                disabled={formData.role === 'visiting' && formData.departments.length === 0}
                 renderInput={(params) => (
                   <TextField
                     {...params}
                     label="Subjects"
                     required={formData.role === 'visiting'}
                     error={!!formErrors.subjects}
+                    helperText={
+                      formData.role === 'visiting' && formData.departments.length === 0 
+                      ? 'Select departments first' 
+                      : formErrors.subjects || ''
+                    }
                   />
                 )}
                 renderTags={(value, getTagProps) =>
@@ -551,37 +608,7 @@ const LecturerManagement = () => {
               )}
             </FormControl>
             
-            <FormControl fullWidth className="col-span-2" error={!!formErrors.departments}>
-              <Autocomplete
-                multiple
-                id="departments"
-                options={allDepartments}
-                value={formData.departments}
-                onChange={handleDepartmentsChange}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Departments"
-                    required={formData.role === 'visiting'}
-                    error={!!formErrors.departments}
-                  />
-                )}
-                renderTags={(value, getTagProps) =>
-                  value.map((option, index) => (
-                    <Chip
-                      variant="outlined"
-                      label={option}
-                      size="small"
-                      {...getTagProps({ index })}
-                    />
-                  ))
-                }
-              />
-              {formErrors.departments && (
-                <FormHelperText>{formErrors.departments}</FormHelperText>
-              )}
-            </FormControl>
-            
+            {/* Show hourly rate only for visiting lecturers */}
             {formData.role === 'visiting' && (
               <TextField
                 name="hourlyRate"
